@@ -274,7 +274,7 @@ final case class SwaggerSpecGenerator(
     Json.parse(jsonString).as[T]
   }
 
-  private def paths(routes: Seq[Route], prefix: String, tag: Option[Tag]): JsObject = {
+  private[playSwagger] def paths(routes: Seq[Route], prefix: String, tag: Option[Tag]): JsObject = {
     JsObject {
       routes.flatMap(endPointEntry(_, prefix, tag))
         .groupBy(_._1) // Routes grouped by path

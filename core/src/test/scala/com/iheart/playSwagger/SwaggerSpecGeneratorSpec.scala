@@ -3,6 +3,7 @@ package com.iheart.playSwagger
 import com.iheart.playSwagger.Domain.{CustomTypeMapping, CustomMappings}
 import org.specs2.mutable.Specification
 import play.api.libs.json._
+import play.routes.compiler.{Route, HandlerCall, HttpVerb, PathPattern, StaticPart}
 
 case class Track(name: String, genre: Option[String], artist: Artist, related: Seq[Artist], numbers: Seq[Int])
 case class Artist(name: String, age: Int)
@@ -74,6 +75,19 @@ class SwaggerSpecGeneratorSpec extends Specification {
     }
   }
 
+  "paths" >> {
+    "preserve the order of paths" >> {
+      val dummyHttpCall = HandlerCall("package", "controller", false, "method", None)
+      val routes = Seq(
+        Route(HttpVerb("GET"), PathPattern(Seq(StaticPart("/a"))), dummyHttpCall),
+        Route(HttpVerb("GET"), PathPattern(Seq(StaticPart("/b"))), dummyHttpCall),
+        Route(HttpVerb("GET"), PathPattern(Seq(StaticPart("/c"))), dummyHttpCall),
+        Route(HttpVerb("PUT"), PathPattern(Seq(StaticPart("/b"))), dummyHttpCall)
+      )
+
+      gen.paths(routes, "prefix", None).keys mustEqual Seq("/prefix/a", "/prefix/b", "/prefix/c")
+    }
+  }
 }
 
 class SwaggerSpecGeneratorIntegrationSpec extends Specification {
