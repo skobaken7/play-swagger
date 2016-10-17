@@ -275,10 +275,15 @@ final case class SwaggerSpecGenerator(
   }
 
   private[playSwagger] def paths(routes: Seq[Route], prefix: String, tag: Option[Tag]): JsObject = {
+    val validRoutes = routes.flatMap(endPointEntry(_, prefix, tag))
+    val pathOrder = validRoutes.map(_._1).distinct
+
     JsObject {
-      routes.flatMap(endPointEntry(_, prefix, tag))
+      validRoutes
         .groupBy(_._1) // Routes grouped by path
         .mapValues(_.map(_._2).reduce(_ deepMerge _))
+        .toSeq
+        .sortBy(r ⇒ pathOrder.indexOf(r._1))
     }
   }
 
